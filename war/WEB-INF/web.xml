@@ -5,7 +5,13 @@
          version="2.5"
          xmlns="http://java.sun.com/xml/ns/javaee">
 
+  <listener>
+		<listener-class>com.pharma.application.Initializer</listener-class>
+  </listener>
+
+
   <!-- Servlets -->
+  
   <servlet>
     <servlet-name>greetServlet</servlet-name>
     <servlet-class>com.pharma.server.GreetingServiceImpl</servlet-class>
