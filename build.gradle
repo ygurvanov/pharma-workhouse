@@ -1,0 +1,102 @@
+apply plugin: 'war'
+apply plugin: 'java'
+apply plugin: 'eclipse-wtp'
+
+sourceCompatibility = 7
+targetCompatibility = 7
+
+sourceSets {
+    gen
+}
+
+configurations { gwtCompile }
+
+dependencies {
+    compile            'com.google.guava:guava:11.0.2'
+    compile            'joda-time:joda-time:2.1'
+    compile            'org.springframework:spring-context:3.1.1.RELEASE'
+    compile            'org.springframework:spring-web:3.1.1.RELEASE'
+    compile            'org.springframework:spring-jdbc:3.1.1.RELEASE'
+	compile            'com.jolbox:bonecp:0.7.1.RELEASE'
+	compile            'org.slf4j:slf4j-simple:1.6.4'
+	compile            'mysql:mysql-connector-java:5.1.20'
+
+	providedCompile    'javax.servlet:servlet-api:2.5'
+
+    testCompile        'junit:junit:4.+'
+    testCompile        'org.mockito:mockito-core:1.9.+'
+
+	// gwt dependencies
+	compile            'com.google.gwt:gwt-dev:2.4.0'
+	compile            'com.google.gwt:gwt-user:2.4.0'
+	compile            'com.google.gwt:gwt-servlet:2.4.0'
+	compile            'com.smartgwt:smartgwt:3.0'
+	compile            'net.customware.gwt.dispatch:gwt-dispatch:1.2.0'
+
+	// dependencies for the gwt compiler
+	gwtCompile (          
+		[group: 'com.google.gwt', name: 'gwt-user', version: '2.4.0'],          
+		[group: 'com.google.gwt', name: 'gwt-dev', version: '2.4.0']
+	)
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        url "http://www.smartclient.com/maven2"
+    }
+}
+
+eclipse {
+    classpath {
+        //default settings for dependencies sources/javadoc download:
+        downloadSources = true
+        downloadJavadoc = true
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            output.resourcesDir = 'war/WEB-INF/classes'
+            output.classesDir  = 'war/WEB-INF/classes'
+			srcDir 'src/main/java'
+        }
+        resources {
+            srcDir 'src/main/resources'
+        }
+    }
+}
+
+gwtBuildDir = 'war'
+ 
+task gwtCompile << {  
+	created = (new File(gwtBuildDir)).mkdirs()  
+	ant.java(classname:'com.google.gwt.dev.Compiler', failOnError: 'true', fork: 'true') 
+	{    
+		jvmarg(value: '-Xmx512M')    
+		arg(line: '-war ' + gwtBuildDir)
+		arg(line: '-logLevel TRACE')    
+		arg(line: '-style PRETTY')    
+		arg(value: 'com.pharma.Pharma_workhouse')    
+		classpath {      
+			pathElement(location: 'src/main/java')      
+			pathElement(path: configurations.compile.asPath)      
+			pathElement(path: configurations.gwtCompile.asPath)    
+		}  
+	}
+}
+
+war.dependsOn gwtCompile
+ 
+war {
+    baseName = 'pharma-workhouse'
+    archiveName = "${baseName}.${extension}"
+    from gwtBuildDir 
+ 
+    manifest {
+        attributes 'Implementation-Title': 'Test Gwt with Gradle Version'
+        attributes 'Implementation-Version': '1.0'
+        attributes provider: 'gradle'
+    }
+}

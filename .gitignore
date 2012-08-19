@@ -1,0 +1,9 @@
+/.gradle
+/.settings
+/.classpath
+/.project
+/build
+/gwt-unitCache
+/war/pharma_workhouse
+/war/WEB-INF/classes
+/war/WEB-INF/deploy
